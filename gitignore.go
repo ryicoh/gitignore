@@ -89,7 +89,7 @@ type Gitignore struct {
 	matches       []uint
 }
 
-func (g *Gitignore) IsIgnore(path string, isDir bool) bool {
+func (g *Gitignore) Ignored(path string, isDir bool) bool {
 	if len(g.globs) == 0 {
 		return false
 	}

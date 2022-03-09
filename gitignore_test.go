@@ -15,7 +15,7 @@ func giFromStr(root string, s string) (*Gitignore, error) {
 
 const ROOT = "/home/foobar/rust/rg"
 
-func TestIgnore(t *testing.T) {
+func TestIgnored(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		root     string
@@ -95,7 +95,7 @@ func TestIgnore(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			actual := gi.IsIgnore(tC.path, tC.isDir)
+			actual := gi.Ignored(tC.path, tC.isDir)
 			if actual != tC.expected {
 				t.Fatalf("%s: root(%s), gi(%s), path(%s) actual(%v), expect(%v)\n",
 					tC.desc, tC.root, tC.gi, tC.path, actual, tC.expected)
