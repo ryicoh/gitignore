@@ -1,4 +1,5 @@
 # gitignore
+[![Go](https://github.com/ryicoh/gitignore/actions/workflows/go.yml/badge.svg)](https://github.com/ryicoh/gitignore/actions/workflows/go.yml)
 
 .gitignore pattern matching in Go.
 
