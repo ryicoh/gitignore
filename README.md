@@ -12,7 +12,7 @@ import "github.com/ryicoh/gitignore"
 
 # Example
 
-```
+```go
 package main
 
 import (
