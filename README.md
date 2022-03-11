@@ -23,9 +23,7 @@ import (
 )
 
 func main() {
-	builder, _ := gitignore.NewGitignoreBuilder(".")
-	_ = builder.AddString(nil, "*.go")
-	gi, _ := builder.Build()
+	gi, _ := gitignore.NewGitignoreFromDir(".")
 	ignored := gi.Ignored("cmd/main.go", false)
 	fmt.Println(ignored)
 }

@@ -2,6 +2,9 @@ package gitignore
 
 import (
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -258,4 +261,41 @@ func (b *GitignoreBuilder) Build() (*Gitignore, error) {
 		numIgnores:    nignore,
 		numWhitelists: nwhite,
 	}, nil
+}
+
+func NewGitignoreFromDir(root string) (*Gitignore, error) {
+	gitignoreFiles := make([]string, 0)
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		_, filename := filepath.Split(path)
+		if filename == ".gitignore" {
+			gitignoreFiles = append(gitignoreFiles, path)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	builder, err := NewGitignoreBuilder(root)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, path := range gitignoreFiles {
+		bytes, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		base := filepath.Base(path)
+		if err := builder.AddString(&base, string(bytes)); err != nil {
+			return nil, err
+		}
+	}
+
+	return builder.Build()
 }

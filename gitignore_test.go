@@ -124,7 +124,7 @@ func testIgnoredRepo(t *testing.T, dir, expectedFile string) {
 	undo := move(t, dir)
 	defer undo()
 
-	gitignore, err := fromGitignoreFiles()
+	gitignore, err := NewGitignoreFromDir(".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,41 +179,4 @@ func move(t *testing.T, dir string) func() {
 			t.Fatal(err)
 		}
 	}
-}
-
-func fromGitignoreFiles() (*Gitignore, error) {
-	gitignoreFiles := make([]string, 0)
-	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		_, filename := filepath.Split(path)
-		if filename == ".gitignore" {
-			gitignoreFiles = append(gitignoreFiles, path)
-		}
-
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	builder, err := NewGitignoreBuilder(".")
-	if err != nil {
-		return nil, err
-	}
-
-	for _, path := range gitignoreFiles {
-		bytes, err := os.ReadFile(path)
-		if err != nil {
-			return nil, err
-		}
-		base := filepath.Base(path)
-		if err := builder.AddString(&base, string(bytes)); err != nil {
-			return nil, err
-		}
-	}
-
-	return builder.Build()
 }
