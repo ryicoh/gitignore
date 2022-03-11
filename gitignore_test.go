@@ -1,6 +1,14 @@
 package gitignore
 
-import "testing"
+import (
+	"github.com/stretchr/testify/assert"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"testing"
+)
 
 func giFromStr(root string, s string) (*Gitignore, error) {
 	builder, err := NewGitignoreBuilder(root)
@@ -102,4 +110,110 @@ func TestIgnored(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestIgnoredRails(t *testing.T) {
+	testIgnoredRepo(t, "testdata/railsapp", "../railsapp_ignored.txt")
+}
+
+func TestIgnoredRepo1(t *testing.T) {
+	testIgnoredRepo(t, "testdata/repo1", "../repo1_ignored.txt")
+}
+
+func testIgnoredRepo(t *testing.T, dir, expectedFile string) {
+	undo := move(t, dir)
+	defer undo()
+
+	gitignore, err := fromGitignoreFiles()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ignoredFiles := make([]string, 0)
+	err = filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return err
+		}
+
+		if gitignore.Ignored(path, d.IsDir()) {
+			ignoredFiles = append(ignoredFiles, path)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bytes, err := os.ReadFile(expectedFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var expects []string
+	for _, str := range strings.Split(string(bytes), "\n") {
+		if str != "" {
+			expects = append(expects, str)
+		}
+	}
+	sort.Strings(ignoredFiles)
+	sort.Strings(expects)
+
+	assert.Equal(t, expects, ignoredFiles)
+}
+
+func move(t *testing.T, dir string) func() {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	return func() {
+		if err := os.Chdir(wd); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func fromGitignoreFiles() (*Gitignore, error) {
+	gitignoreFiles := make([]string, 0)
+	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		_, filename := filepath.Split(path)
+		if filename == ".gitignore" {
+			gitignoreFiles = append(gitignoreFiles, path)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	builder, err := NewGitignoreBuilder(".")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, path := range gitignoreFiles {
+		bytes, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		base := filepath.Base(path)
+		if err := builder.AddString(&base, string(bytes)); err != nil {
+			return nil, err
+		}
+	}
+
+	return builder.Build()
 }

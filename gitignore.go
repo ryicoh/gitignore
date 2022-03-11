@@ -54,13 +54,15 @@ func (g *Glob) Compile() (err error) {
 				nextChar = globStr[i+1]
 			}
 
-			var isGlobstar = starCount > 1 &&
+			var isMultiStar = starCount > 1 &&
 				(prevChar == 0 || prevChar == '/') &&
 				(nextChar == 0 || nextChar == '/')
 
-			if isGlobstar {
+			if isMultiStar {
 				reStr += "((?:[^/]*(?:\\/|$))*)"
 				i++
+			} else if i == len(globStr)-1 {
+				reStr += "((?:[^/]*(?:\\/|$))*)"
 			} else {
 				reStr += "([^/]*)"
 			}
