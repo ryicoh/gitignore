@@ -1,0 +1,5 @@
+dir1/.env
+dir1/dir1/.env
+dir2/file1.swp
+file.back
+file.swp
