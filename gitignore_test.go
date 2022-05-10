@@ -116,6 +116,10 @@ func TestIgnoredRails(t *testing.T) {
 	testIgnoredRepo(t, "testdata/railsapp", "../railsapp_ignored.txt")
 }
 
+func TestIgnoredReact(t *testing.T) {
+	testIgnoredRepo(t, "testdata/reactapp", "../reactapp_ignored.txt")
+}
+
 func TestIgnoredRepo1(t *testing.T) {
 	testIgnoredRepo(t, "testdata/repo1", "../repo1_ignored.txt")
 }

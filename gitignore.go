@@ -76,7 +76,7 @@ func (g *Glob) Compile() (err error) {
 		}
 	}
 
-	reStr = "^" + reStr + "$"
+	reStr = "^" + reStr
 
 	g.re, err = regexp.Compile(reStr)
 	return err
